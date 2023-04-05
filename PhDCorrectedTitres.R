@@ -16,6 +16,7 @@ data_cortitre <- data_brms[,c('Farm',
                               'cellcount',
                               'protein',
                               'butterfat',
+                              'meantitrenegcows',
                               'titre'
                               )]
 
@@ -37,7 +38,9 @@ data_cortitre$goodrows <- ifelse(data_cortitre$age >= 18 &
                                !is.na(data_cortitre$dim) &
                                  data_cortitre$dim <= 750 &
                                         !is.na(data_cortitre$titre) &
-                                                 data_cortitre$titre > 0,
+                                                 data_cortitre$titre > 0 &
+                                 !is.na(data_cortitre$meantitrenegcows) &
+                                 data_cortitre$meantitrenegcows > 0,
                              1,0)
 
 regcores(-1)
@@ -120,6 +123,10 @@ ggplot(data_cortitre,
        aes(x = titre)) +
   geom_histogram()
 
+ggplot(data_cortitre,
+       aes(x = meantitrenegcows)) +
+  geom_histogram()
+
 
 data_cortitre$titre_log <- log(data_cortitre$titre)
 
@@ -135,37 +142,11 @@ hist(data_cortitre$cellcount_log,100)
 data_cortitre_primi <- data_cortitre[data_cortitre$parity == 1,]
 data_cortitre_multi <- data_cortitre[data_cortitre$parity > 1,]
 
-####REMOVE OUTLIERS####
-
-#Note that data is not restricted to +/- 2 SDs for titre
-
-#for(v in c('dim',
-#           'age',
-#           'yield',
-#           'cellcount_log',
-#           'protein',
-#           'butterfat')){
-
-
-#colnum <- match(v, colnames(data_cortitre_primi))
-#sdv <- sd(data_cortitre_primi[,colnum])
-#meanv <- mean(data_cortitre_primi[,colnum])
-#data_cortitre_primi <- data_cortitre_primi[data_cortitre_primi[,colnum] >= meanv - (2 * sdv) &
-#                                             data_cortitre_primi[,colnum] <= meanv + (2 * sdv),]
-
-
-#colnum <- match(v, colnames(data_cortitre_multi))
-#sdv <- sd(data_cortitre_multi[,colnum])
-#meanv <- mean(data_cortitre_multi[,colnum])
-#data_cortitre_multi <- data_cortitre_multi[data_cortitre_multi[,colnum] >= meanv - (2 * sdv) &
-#                                             data_cortitre_multi[,colnum] <= meanv + (2 * sdv),]
-
-#}
-
-
 ####UNIVARIABLE PLOTS####
 
 #####PRIMPAROUS#####
+
+######DIM######
 
 ggplot(data_cortitre_primi,
        aes(x = dim,
@@ -180,6 +161,8 @@ ggplot(data_cortitre_primi,
   geom_point() +
   geom_smooth() +
   labs(title = "Primiparous")
+
+######YIELD######
 
 ggplot(data_cortitre_primi,
        aes(x = yield,
@@ -197,6 +180,8 @@ ggplot(data_cortitre_primi,
   facet_wrap(~ cut(dim,4) +
                cut(age,4)) +
   labs(title = "Primiparous")
+
+######AGE######
 
 ggplot(data_cortitre_primi,
        aes(x = age,
@@ -247,6 +232,8 @@ ggplot(data_cortitre_primi,
   geom_smooth() +
   labs(title = "Primiparous")
 
+######CELLCOUNT######
+
 
 ggplot(data_cortitre_primi,
        aes(x = cellcount_log,
@@ -263,6 +250,8 @@ ggplot(data_cortitre_primi,
   labs(title = "Primiparous") +
   facet_wrap(~cut(yield, 10))
 
+######PROTEIN######
+
 ggplot(data_cortitre_primi,
        aes(x = protein,
            y = titre_log)) +
@@ -270,6 +259,8 @@ ggplot(data_cortitre_primi,
   geom_smooth() +
   labs(title = "Primiparous") +
   facet_wrap(~cut(yield, 6))
+
+######BUTTERFAT######
 
 ggplot(data_cortitre_primi,
        aes(x = butterfat,
@@ -279,8 +270,19 @@ ggplot(data_cortitre_primi,
   labs(title = "Primiparous") +
   facet_wrap(~cut(yield, 6))
 
+######MTNC######
+
+ggplot(data_cortitre_primi,
+       aes(x = meantitrenegcows,
+           y = titre_log)) +
+  geom_point() +
+  geom_smooth() +
+  labs(title = "Primiparous")
+
 
 #####MULTIPAROUS#####
+
+######DIM######
 
 ggplot(data_cortitre_multi,
        aes(x = dim,
@@ -289,12 +291,22 @@ ggplot(data_cortitre_multi,
   geom_smooth() +
   labs(title = "Multiparous")
 
+######AGE######
+
 ggplot(data_cortitre_multi,
        aes(x = age,
            y = titre_log)) +
   geom_point() +
   geom_smooth() +
   labs(title = "Multiparous")
+
+ggplot(data_cortitre_primi,
+       aes(x = age,
+           y = dim)) +
+  geom_point() +
+  geom_smooth()
+
+######YIELD######
 
 
 ggplot(data_cortitre_multi,
@@ -312,6 +324,7 @@ ggplot(data_cortitre_multi,
   labs(title = "Multiparous") +
   facet_wrap(~cut(dim, 10))
 
+######CELLCOUNT######
 
 ggplot(data_cortitre_multi,
        aes(x = cellcount_log,
@@ -320,13 +333,7 @@ ggplot(data_cortitre_multi,
   geom_smooth() +
   labs(title = "Multiparous")
 
-ggplot(data_cortitre_multi,
-       aes(x = yield,
-           y = titre_log)) +
-  geom_point() +
-  geom_smooth() +
-  labs(title = "Multiparous") +
-  facet_wrap(~cut(dim, 6))
+######PROTEIN######
 
 ggplot(data_cortitre_multi,
        aes(x = protein,
@@ -343,28 +350,31 @@ ggplot(data_cortitre_multi,
   labs(title = "Multiparous") +
   facet_wrap(~cut(yield, 6))
 
+######BUTTERFAT######
+  
 ggplot(data_cortitre_multi,
        aes(x = butterfat,
            y = titre_log)) +
   geom_point() +
   geom_smooth() +
   labs(title = "Multiparous")
-
-
-ggplot(data_cortitre_primi,
-       aes(x = age,
-           y = dim)) +
+  
+######MTNC######
+  
+  
+ggplot(data_cortitre_multi,
+       aes(x = meantitrenegcows,
+           y = titre_log)) +
   geom_point() +
-  geom_smooth()
-
-
+  geom_smooth() +
+  labs(title = "Multiparous")
 
 ####CREATE B SPLINE MODELS####
 
 #####DIM#####
 
 ######PRIMIPAROUS######
-
+  
 overall <- foreach(d = c(6:25), .combine = "rbind") %do% {
 
   mod <- lm(titre_log ~ 
@@ -407,24 +417,6 @@ crossval <- foreach(d = c(6:25), .combine = "rbind", .packages = c("foreach", "s
       mse = mean(se)
       rmse = sqrt(mse)
       
-      #x = testset$dim
-      #x2 = x^2
-      #y = testset$titre_log
-      #y2 = y^2
-      #xy = x*y
-      #n = nrow(testset)
-      
-      #nsumxy = n * sum(xy)
-      #sumx = sum(x)
-      #sumy = sum(y)
-      #nsumx2 = n * sum(x2)
-      #nsumy2 = n * sum(y2)
-      
-      #numr = nsumxy - (sumx * sumy)
-      #denr = sqrt(nsumx2 - (sumx^2)) * sqrt(nsumy2 - (sumy^2))
-      
-      #rsq = (numr/denr)^2
-
       r = cor(pred, testset$titre_log)
       rsq = r^2
             
@@ -460,10 +452,6 @@ ggplot(rslts,
        aes(x = df)) +
   geom_line(aes(y = RMSE), color = "blue") +
   geom_line(aes(y = cv_RMSE), color = "darkblue")
-
-
-
-
 
 
 mod <- lm(titre_log ~ 
@@ -525,24 +513,6 @@ crossval <- foreach(d = c(6:25), .combine = "rbind", .packages = c("foreach", "s
       se = e^2
       mse = mean(se)
       rmse = sqrt(mse)
-      
-      #x = testset$dim
-      #x2 = x^2
-      #y = testset$titre_boxcox
-      #y2 = y^2
-      #xy = x*y
-      #n = nrow(testset)
-      
-      #nsumxy = n * sum(xy)
-      #sumx = sum(x)
-      #sumy = sum(y)
-      #nsumx2 = n * sum(x2)
-      #nsumy2 = n * sum(y2)
-      
-      #numr = nsumxy - (sumx * sumy)
-      #denr = sqrt(nsumx2 - (sumx^2)) * sqrt(nsumy2 - (sumy^2))
-      
-      #rsq = (numr/denr)^2
       
       r = cor(pred, testset$titre_log)
       rsq = r^2
@@ -641,24 +611,6 @@ crossval <- foreach(d = c(3:10), .combine = "rbind", .packages = c("foreach", "s
       mse = mean(se)
       rmse = sqrt(mse)
       
-      #x = testset$dim
-      #x2 = x^2
-      #y = testset$titre_boxcox
-      #y2 = y^2
-      #xy = x*y
-      #n = nrow(testset)
-      
-      #nsumxy = n * sum(xy)
-      #sumx = sum(x)
-      #sumy = sum(y)
-      #nsumx2 = n * sum(x2)
-      #nsumy2 = n * sum(y2)
-      
-      #numr = nsumxy - (sumx * sumy)
-      #denr = sqrt(nsumx2 - (sumx^2)) * sqrt(nsumy2 - (sumy^2))
-      
-      #rsq = (numr/denr)^2
-      
       r = cor(pred, testset$titre_log)
       rsq = r^2
       
@@ -756,24 +708,7 @@ crossval <- foreach(d = c(3:25), .combine = "rbind", .packages = c("foreach", "s
       mse = mean(se)
       rmse = sqrt(mse)
       
-      #x = testset$dim
-      #x2 = x^2
-      #y = testset$titre_boxcox
-      #y2 = y^2
-      #xy = x*y
-      #n = nrow(testset)
-      
-      #nsumxy = n * sum(xy)
-      #sumx = sum(x)
-      #sumy = sum(y)
-      #nsumx2 = n * sum(x2)
-      #nsumy2 = n * sum(y2)
-      
-      #numr = nsumxy - (sumx * sumy)
-      #denr = sqrt(nsumx2 - (sumx^2)) * sqrt(nsumy2 - (sumy^2))
-      
-      #rsq = (numr/denr)^2
-      
+     
       r = cor(pred, testset$titre_log)
       rsq = r^2
       
@@ -828,7 +763,7 @@ ggplot(df,
 
 
 
-####SPLINES SUMMARY####
+#####SPLINES SUMMARY#####
 
 #Primiparous DIM DF = 12
 #Multiparous DIM DF = 12
@@ -891,6 +826,15 @@ mod <- lmer(titre_log ~
 
 
 
+######MTNC######
+
+
+
+mod <- lmer(titre_log ~
+              meantitrenegcows +
+              (1 | Farm) +
+              (1 | calfeartag),
+            data = data_cortitre_primi)
 #####MULTIPAROUS#####
 
 ######AGE######
@@ -941,11 +885,21 @@ mod <- lmer(titre_log ~
               (1 | calfeartag),
             data = data_cortitre_multi)
 
+######MTNC######
+
+mod <- lmer(titre_log ~
+              meantitrenegcows +
+              (1 | Farm) +
+              (1 | calfeartag),
+            data = data_cortitre_multi)
+
 
 
 ####MULTIVARIABLE MODELS####
 
 #####PRIMIPAROUS#####
+
+######WITHOUT MTNC######
 
 primi_mod1 <- lmer(titre_log ~
                      bs(dim, df = 12, degree = 3) +
@@ -1015,10 +969,313 @@ primi_mod5 <-  lmer(titre_log ~
 
 plot(ggpredict(primi_mod5, terms = c('yield', 'protein', 'cellcount_log')))
 
+primi_mod6 <- lmer(titre_log ~
+                     bs(dim, df = 12, degree = 3) +
+                     yield *
+                     cellcount_log +
+                     protein *
+                     cellcount_log +
+                     age +
+                     butterfat +
+                     meantitrenegcows +
+                     (1 | Farm) +
+                     (1 | calfeartag),
+                   data = data_cortitre_primi)
+
 #STICK WITH PRIMI_MOD5: Interactions between yield and cellcount and protein and cellcount
+
+######WITH MTNC######
+
+primi_mod1m <- lmer(titre_log ~
+                      bs(dim, df = 12, degree = 3) +
+                      yield +
+                      age +
+                      cellcount_log +
+                      protein +
+                      butterfat +
+                      meantitrenegcows +
+                      (1 | Farm) +
+                      (1 | calfeartag),
+                    data = data_cortitre_primi)
+
+#Interactions:
+
+primi_mod2m <- lmer(titre_log ~
+                      bs(dim, df = 12, degree = 3) +
+                      yield *
+                      age +
+                      cellcount_log +
+                      protein +
+                      butterfat +
+                      meantitrenegcows +
+                      (1 | Farm) +
+                      (1 | calfeartag),
+                    data = data_cortitre_primi)
+
+plot(ggpredict(primi_mod2m, terms = c('yield', 'age')))
+
+primi_mod3m <- lmer(titre_log ~
+                      bs(dim, df = 12, degree = 3) +
+                      yield *
+                      cellcount_log +
+                      age +
+                      protein +
+                      butterfat +
+                      meantitrenegcows +
+                      (1 | Farm) +
+                      (1 | calfeartag),
+                    data = data_cortitre_primi)
+
+plot(ggpredict(primi_mod3m, terms = c('yield', 'cellcount_log')))
+
+primi_mod4m <- lmer(titre_log ~
+                      bs(dim, df = 12, degree = 3) +
+                      yield *
+                      protein +
+                      cellcount_log +
+                      age +
+                      butterfat +
+                      meantitrenegcows +
+                      (1 | Farm) +
+                      (1 | calfeartag),
+                    data = data_cortitre_primi)
+
+plot(ggpredict(primi_mod4m, terms = c('yield', 'protein')))
+
+primi_mod5m <- lmer(titre_log ~
+                      bs(dim, df = 12, degree = 3) +
+                      yield *
+                      meantitrenegcows +
+                      protein +
+                      cellcount_log +
+                      age +
+                      butterfat +
+                      (1 | Farm) +
+                      (1 | calfeartag),
+                    data = data_cortitre_primi)
+
+
+plot(ggpredict(primi_mod5m, terms = c('yield', 'meantitrenegcows')))
+
+primi_mod6m <- lmer(titre_log ~
+                      bs(dim, df = 12, degree = 3) +
+                      yield *
+                      butterfat +
+                      protein +
+                      cellcount_log +
+                      age +
+                      meantitrenegcows +
+                      (1 | Farm) +
+                      (1 | calfeartag),
+                    data = data_cortitre_primi)
+
+plot(ggpredict(primi_mod6m, terms = c('yield', 'butterfat')))
+
+primi_mod7m <- lmer(titre_log ~
+                      bs(dim, df = 12, degree = 3) +
+                      yield +
+                      age *
+                      butterfat +
+                      cellcount_log +
+                      protein +
+                      meantitrenegcows +
+                      (1 | Farm) +
+                      (1 | calfeartag),
+                    data = data_cortitre_primi)
+
+plot(ggpredict(primi_mod7m, terms = c('age', 'butterfat')))
+
+primi_mod8m <- lmer(titre_log ~
+                      bs(dim, df = 12, degree = 3) +
+                      yield +
+                      age *
+                      meantitrenegcows +
+                      cellcount_log +
+                      protein +
+                      butterfat +
+                      (1 | Farm) +
+                      (1 | calfeartag),
+                    data = data_cortitre_primi)
+
+plot(ggpredict(primi_mod8m, terms = c('age', 'meantitrenegcows')))
+
+primi_mod9m <- lmer(titre_log ~
+                      bs(dim, df = 12, degree = 3) +
+                      yield +
+                      age *
+                      cellcount_log +
+                      meantitrenegcows +
+                      protein +
+                      butterfat +
+                      (1 | Farm) +
+                      (1 | calfeartag),
+                    data = data_cortitre_primi)
+
+plot(ggpredict(primi_mod9m, terms = c('age', 'cellcount_log')))
+
+primi_mod10m <- lmer(titre_log ~
+                      bs(dim, df = 12, degree = 3) +
+                      yield +
+                      age *
+                      protein +
+                      meantitrenegcows +
+                      cellcount_log +
+                      butterfat +
+                      (1 | Farm) +
+                      (1 | calfeartag),
+                    data = data_cortitre_primi)
+
+plot(ggpredict(primi_mod10m, terms = c('age', 'protein')))
+
+primi_mod11m <- lmer(titre_log ~
+                       bs(dim, df = 12, degree = 3) +
+                       yield +
+                       age +
+                       protein +
+                       cellcount_log +
+                       butterfat *
+                       meantitrenegcows +
+                       (1 | Farm) +
+                       (1 | calfeartag),
+                     data = data_cortitre_primi)
+
+plot(ggpredict(primi_mod11m, terms = c('butterfat', 'meantitrenegcows')))
+
+primi_mod12m <- lmer(titre_log ~
+                       bs(dim, df = 12, degree = 3) +
+                       yield +
+                       age +
+                       protein +
+                       meantitrenegcows +
+                       butterfat *
+                       cellcount_log +
+                       (1 | Farm) +
+                       (1 | calfeartag),
+                     data = data_cortitre_primi)
+
+plot(ggpredict(primi_mod12m, terms = c('butterfat', 'cellcount_log')))
+
+primi_mod13m <- lmer(titre_log ~
+                       bs(dim, df = 12, degree = 3) +
+                       yield +
+                       age +
+                       cellcount_log +
+                       meantitrenegcows +
+                       butterfat *
+                       protein +
+                       (1 | Farm) +
+                       (1 | calfeartag),
+                     data = data_cortitre_primi)
+
+plot(ggpredict(primi_mod13m, terms = c('butterfat', 'protein')))
+
+primi_mod14m <- lmer(titre_log ~
+                       bs(dim, df = 12, degree = 3) +
+                       yield +
+                       age +
+                       butterfat +
+                       meantitrenegcows +
+                       cellcount_log *
+                       protein +
+                       (1 | Farm) +
+                       (1 | calfeartag),
+                     data = data_cortitre_primi)
+
+plot(ggpredict(primi_mod14m, terms = c('protein', 'cellcount_log')))
+
+primi_mod15m <- lmer(titre_log ~
+                       bs(dim, df = 12, degree = 3) +
+                       yield +
+                       age +
+                       butterfat +
+                       meantitrenegcows *
+                       cellcount_log +
+                       protein +
+                       (1 | Farm) +
+                       (1 | calfeartag),
+                     data = data_cortitre_primi)
+
+plot(ggpredict(primi_mod15m, terms = c('meantitrenegcows', 'cellcount_log')))
+
+primi_mod16m <- lmer(titre_log ~
+                       bs(dim, df = 12, degree = 3) +
+                       yield +
+                       age +
+                       butterfat +
+                       meantitrenegcows *
+                       protein +
+                       cellcount_log +
+                       (1 | Farm) +
+                       (1 | calfeartag),
+                     data = data_cortitre_primi)
+
+plot(ggpredict(primi_mod16m, terms = c('meantitrenegcows', 'protein')))
+
+#Interactions summary:
+
+#Worth considering:
+
+#Yield * cellcount_log
+
+#Butterfat * protein
+
+#Protein * cellcount
+
+primi_mod17m <- lmer(titre_log ~
+                                       bs(dim, df = 12, degree = 3) +
+                                       yield +
+                                       age +
+                                       butterfat *
+                                       protein +
+                                       meantitrenegcows +
+                                       cellcount_log +
+                                       (1 | Farm) +
+                                       (1 | calfeartag),
+                                     data = data_cortitre_primi)
+
+primi_mod18m <- lmer(titre_log ~
+                       bs(dim, df = 12, degree = 3) +
+                       yield +
+                       age +
+                       butterfat *
+                       protein +
+                       cellcount_log *
+                       protein +
+                       meantitrenegcows +
+                       (1 | Farm) +
+                       (1 | calfeartag),
+                     data = data_cortitre_primi)
+
+primi_mod19m <- lmer(titre_log ~
+                       bs(dim, df = 12, degree = 3) +
+                       yield +
+                       age +
+                       butterfat *
+                       protein +
+                       cellcount_log *
+                       protein +
+                       meantitrenegcows +
+                       yield *
+                       cellcount_log +
+                       (1 | Farm) +
+                       (1 | calfeartag),
+                     data = data_cortitre_primi)
+
+
+#Yield * cellcount_log not that interesting. Stick to primi_mod18m
+
+
+plot(ggpredict(primi_mod18m, terms = "dim"))
+plot(ggpredict(primi_mod18m, terms = "yield"))
+plot(ggpredict(primi_mod18m, terms = "age"))
+plot(ggpredict(primi_mod18m, terms = "meantitrenegcows"))
+plot(ggpredict(primi_mod18m, terms = c("butterfat", "protein")))
+plot(ggpredict(primi_mod18m, terms = c("cellcount_log", "protein")))
 
 
 #####MULTIPAROUS#####
+
+######WITHOUT MTNC######
 
 multi_mod1 <- lmer(titre_log ~
                      bs(dim, df = 12, degree = 3) +
