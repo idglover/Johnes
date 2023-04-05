@@ -1265,12 +1265,7 @@ primi_mod19m <- lmer(titre_log ~
 #Yield * cellcount_log not that interesting. Stick to primi_mod18m
 
 
-plot(ggpredict(primi_mod18m, terms = "dim"))
-plot(ggpredict(primi_mod18m, terms = "yield"))
-plot(ggpredict(primi_mod18m, terms = "age"))
-plot(ggpredict(primi_mod18m, terms = "meantitrenegcows"))
-plot(ggpredict(primi_mod18m, terms = c("butterfat", "protein")))
-plot(ggpredict(primi_mod18m, terms = c("cellcount_log", "protein")))
+
 
 
 #####MULTIPAROUS#####
@@ -1317,15 +1312,134 @@ plot(ggpredict(multi_mod3, terms = c("cellcount_log", "protein")))
 
 #Keep Multi_mod3: Interesting interaction between cell count and protein
 
+######WITH MTNC######
+
+multi_mod1m <- lmer(titre_log ~
+                     bs(dim, df = 12, degree = 3) +
+                     bs(yield, df = 4, degree = 3) +
+                     bs(age, df = 3, degree = 3) +
+                     cellcount_log +
+                     protein +
+                     butterfat +
+                      meantitrenegcows +
+                     (1 | Farm) +
+                     (1 | calfeartag),
+                   data = data_cortitre_multi)
+
+
+#Butterfat is significant here
+
+#Now try interactions:
+
+multi_mod2m <- lmer(titre_log ~
+                      bs(dim, df = 12, degree = 3) +
+                      bs(yield, df = 4, degree = 3) +
+                      bs(age, df = 3, degree = 3) +
+                      cellcount_log *
+                      protein +
+                      butterfat +
+                      meantitrenegcows +
+                      (1 | Farm) +
+                      (1 | calfeartag),
+                    data = data_cortitre_multi)
+
+plot(ggpredict(multi_mod2m, terms = c('cellcount_log', 'protein')))
+
+multi_mod3m <- lmer(titre_log ~
+                      bs(dim, df = 12, degree = 3) +
+                      bs(yield, df = 4, degree = 3) +
+                      bs(age, df = 3, degree = 3) +
+                      cellcount_log *
+                      butterfat +
+                      protein +
+                      meantitrenegcows +
+                      (1 | Farm) +
+                      (1 | calfeartag),
+                    data = data_cortitre_multi)
+
+plot(ggpredict(multi_mod3m, terms = c('cellcount_log', 'butterfat')))
+
+multi_mod4m <- lmer(titre_log ~
+                      bs(dim, df = 12, degree = 3) +
+                      bs(yield, df = 4, degree = 3) +
+                      bs(age, df = 3, degree = 3) +
+                      cellcount_log *
+                      meantitrenegcows +
+                      protein +
+                      butterfat +
+                      (1 | Farm) +
+                      (1 | calfeartag),
+                    data = data_cortitre_multi)
+
+plot(ggpredict(multi_mod4m, terms = c('cellcount_log', 'meantitrenegcows')))
+
+multi_mod5m <- lmer(titre_log ~
+                      bs(dim, df = 12, degree = 3) +
+                      bs(yield, df = 4, degree = 3) +
+                      bs(age, df = 3, degree = 3) +
+                      cellcount_log +
+                      meantitrenegcows +
+                      protein *
+                      butterfat +
+                      (1 | Farm) +
+                      (1 | calfeartag),
+                    data = data_cortitre_multi)
+
+plot(ggpredict(multi_mod5m, terms = c('protein', 'butterfat')))
+
+multi_mod6m <- lmer(titre_log ~
+                      bs(dim, df = 12, degree = 3) +
+                      bs(yield, df = 4, degree = 3) +
+                      bs(age, df = 3, degree = 3) +
+                      cellcount_log +
+                      butterfat +
+                      protein *
+                      meantitrenegcows +
+                      (1 | Farm) +
+                      (1 | calfeartag),
+                    data = data_cortitre_multi)
+
+plot(ggpredict(multi_mod6m, terms = c('protein', 'meantitrenegcows')))
+
+multi_mod7m <- lmer(titre_log ~
+                      bs(dim, df = 12, degree = 3) +
+                      bs(yield, df = 4, degree = 3) +
+                      bs(age, df = 3, degree = 3) +
+                      cellcount_log +
+                      protein +
+                      butterfat *
+                      meantitrenegcows +
+                      (1 | Farm) +
+                      (1 | calfeartag),
+                    data = data_cortitre_multi)
+
+plot(ggpredict(multi_mod7m, terms = c('butterfat', 'meantitrenegcows')))
+
+multi_mod8m <- lmer(titre_log ~
+                      bs(dim, df = 12, degree = 3) +
+                      bs(yield, df = 4, degree = 3) +
+                      bs(age, df = 3, degree = 3) +
+                      cellcount_log *
+                      protein +
+                      butterfat *
+                      meantitrenegcows +
+                      (1 | Farm) +
+                      (1 | calfeartag),
+                    data = data_cortitre_multi)
+
+
+
+#Stick with multi_mod8m
+
 #####CHECK NORMALITY OF RANDOM EFFECTS#####
 
-re <- ranef(primi_mod5)
+re <- ranef(primi_mod18m)
 
 hist(re$calfeartag$`(Intercept)`)
 hist(re$Farm$`(Intercept)`)
 
 
-re <- ranef(multi_mod3)
+re <- ranef(multi_mod8m)
 
 hist(re$calfeartag$`(Intercept)`)
 hist(re$Farm$`(Intercept)`)
@@ -1335,61 +1449,30 @@ hist(re$Farm$`(Intercept)`)
 #####PRIMIPAROUS MODEL#####
 
 
-plot(ggpredict(primi_mod5))
-
-plot(ggpredict(primi_mod5, terms = c('protein', 'cellcount_log')))
-plot(ggpredict(primi_mod5, terms = c('yield', 'cellcount_log')))
+plot(ggpredict(primi_mod18m, terms = "dim"))
+plot(ggpredict(primi_mod18m, terms = "yield"))
+plot(ggpredict(primi_mod18m, terms = "age"))
+plot(ggpredict(primi_mod18m, terms = "meantitrenegcows"))
+plot(ggpredict(primi_mod18m, terms = c("butterfat", "protein")))
+plot(ggpredict(primi_mod18m, terms = c("cellcount_log", "protein")))
 
 
 
 #####MULTIPAROUS MODEL#####
 
-plot(ggpredict(multi_mod3))
+plot(ggpredict(multi_mod8m, terms = "dim"))
+plot(ggpredict(multi_mod8m, terms = "yield"))
+plot(ggpredict(multi_mod8m, terms = "age"))
+plot(ggpredict(multi_mod8m, terms = c("cellcount_log", "protein")))
+plot(ggpredict(multi_mod8m, terms = c("butterfat", "meantitrenegcows")))
 
 
-plot(ggpredict(multi_mod3, terms = c('protein', 'cellcount_log')))
-
-
-#####PLOTS#####
-
-ce_primi <- ggpredict(primi_mod5, terms = c("butterfat"))
-ce_primi$predicted_exp <- exp(ce_primi$predicted)
-
-ce_multi <- ggpredict(multi_mod3, terms = "butterfat")
-
-ce_multi$predicted_exp <- exp(ce_multi$predicted)
-
-ggplot() +
-  geom_point(data = ce_primi,
-             aes(x = x,
-                 y = predicted_exp)) +
-  geom_line(data = ce_primi,
-            aes(x = x,
-                y = predicted_exp)) +
-  geom_point(data = ce_multi,
-             aes(x = x,
-                 y = predicted_exp), shape = 2) +
-  geom_line(data = ce_multi,
-            aes(x = x,
-                y = predicted_exp)) +
-  labs(x = "Butterfat (%)", y = "Predicted Titre") 
-
-
-ggplot() +
-  geom_point(data = ce_primi,
-             aes(x = x,
-                 y = predicted_exp)) +
-  geom_line(data = ce_primi,
-            aes(x = x,
-                y = predicted_exp)) +
-  
-  labs(x = "Butterfat (%)", y = "Predicted Titre") 
 
 ####GET CORRECTED TITRES ON MODELLING DATA####
 
 #####PRIMIPAROUS#####
 
-data_cortitre_primi$titre_pred <- predict(primi_mod5,
+data_cortitre_primi$titre_pred <- predict(primi_mod18m,
                                           newdata = data_cortitre_primi,
                                           re.form = ~ 0)
 
@@ -1401,9 +1484,10 @@ median_primi_cow <- data.frame(age = median(data_cortitre_primi$age),
                                yield = median(data_cortitre_primi$yield),
                                cellcount_log = median(data_cortitre_primi$cellcount_log),
                                protein = median(data_cortitre_primi$protein),
-                               butterfat = median(data_cortitre_primi$butterfat))
+                               butterfat = median(data_cortitre_primi$butterfat),
+                               meantitrenegcows = median(data_cortitre_primi$meantitrenegcows))
 
-titre_median_primi <- predict(primi_mod5,
+titre_median_primi <- predict(primi_mod18m,
                               newdata = median_primi_cow,
                               re.form = ~ 0)
 
@@ -1431,7 +1515,7 @@ ggplot(data_cortitre_primi,
 
 #####MULTIPAROUS#####
 
-data_cortitre_multi$titre_pred <- predict(multi_mod3,
+data_cortitre_multi$titre_pred <- predict(multi_mod8m,
                                           newdata = data_cortitre_multi,
                                           re.form = ~ 0)
 
@@ -1443,9 +1527,10 @@ median_multi_cow <- data.frame(age = median(data_cortitre_multi$age),
                                yield = median(data_cortitre_multi$yield),
                                cellcount_log = median(data_cortitre_multi$cellcount_log),
                                protein = median(data_cortitre_multi$protein),
-                               butterfat = median(data_cortitre_multi$butterfat))
+                               butterfat = median(data_cortitre_multi$butterfat),
+                               meantitrenegcows = median(data_cortitre_multi$meantitrenegcows))
 
-titre_median_multi <- predict(multi_mod3,
+titre_median_multi <- predict(multi_mod8m,
                               newdata = median_multi_cow,
                               re.form = ~ 0)
 
@@ -1477,7 +1562,7 @@ ggplot(data_cortitre_multi,
 
 ######APPARENT ERRORS######
 
-data_cortitre_primi$pred <- predict(primi_mod5,
+data_cortitre_primi$pred <- predict(primi_mod18m,
                                     newdata = data_cortitre_primi,
                                     re.form = ~ 0)
 
@@ -1492,6 +1577,8 @@ mae_primi_app <- mean(data_cortitre_primi$titre_log -
 
 ######CV ERRORS######
 
+model.formula = formula(primi_mod18m)
+
 regcores(-1)
 
 cv_primi <- foreach(j = 1:10, .packages = c("lme4", "foreach", "caret", "splines"), .combine = "rbind") %dopar% {
@@ -1505,15 +1592,7 @@ cv_primi <- foreach(j = 1:10, .packages = c("lme4", "foreach", "caret", "splines
     trainset <- data_cortitre_primi[folds[[k]],]
     testset <- data_cortitre_primi[-folds[[k]],]
     
-    mod <- lmer(titre_log ~ 
-                  bs(dim, df = 12, degree = 3) + 
-                  yield *
-                  cellcount_log + 
-                  protein * cellcount_log + 
-                  age + 
-                  butterfat + 
-                  (1 | Farm) + 
-                  (1 | calfeartag),
+    mod <- lmer(model.formula,
                 data = trainset)
     
     testset$pred <- predict(mod,
@@ -1553,7 +1632,7 @@ mae_primi_cv <- mean(cv_primi[,5])
 
 ######APPARENT ERRORS######
 
-data_cortitre_multi$pred <- predict(multi_mod3,
+data_cortitre_multi$pred <- predict(multi_mod8m,
                                     newdata = data_cortitre_multi,
                                     re.form = ~ 0)
 
@@ -1568,6 +1647,8 @@ mae_multi_app <- mean(data_cortitre_multi$titre_log -
 
 ######CV ERRORS######
 
+model.formula = formula(multi_mod8m)
+
 regcores(-1)
 
 cv_multi <- foreach(j = 1:10, .packages = c("lme4", "foreach", "caret", "splines"), .combine = "rbind") %dopar% {
@@ -1581,13 +1662,7 @@ cv_multi <- foreach(j = 1:10, .packages = c("lme4", "foreach", "caret", "splines
     trainset <- data_cortitre_multi[folds[[k]],]
     testset <- data_cortitre_multi[-folds[[k]],]
     
-    mod <- lmer(titre_log ~ bs(dim, df = 12, degree = 3) + 
-                  bs(yield, df = 4, degree = 3) + 
-                  bs(age, df = 3, degree = 3) + 
-                  cellcount_log * 
-                  protein + 
-                  (1 | Farm) + 
-                  (1 | calfeartag),
+    mod <- lmer(model.formula,
                 data = trainset)
     
     testset$pred <- predict(mod,
@@ -1701,49 +1776,6 @@ ggplot(data_cortitre_multi,
        x = 'Predicted Log Titre',
        y = 'Residual Log Titre')
 
-####EXTREMENESS OF CORRECTED TITRES####
-
-#####PRIMIPAROUS MODEL#####
-
-regcores()
-
-data_cortitre_primi$titre_ext <- foreach(r = 1:nrow(data_cortitre_primi), .combine = "c") %dopar% {
-  nrow(data_cortitre_primi[data_cortitre_primi$titre_corrected < 
-                             data_cortitre_primi$titre_corrected[r],]) /
-    nrow(data_cortitre_primi)
-} 
-
-stopCluster(cl)
-
-ggplot(data_cortitre_primi,
-       aes(x = titre_corrected,
-           y = titre_ext)) +
-  geom_point() +
-  labs(title = "Cumulative Distribution",
-       subtitle = "Primiparous Model",
-       x = "Corrected Titre",
-       y = "Percentile")
-
-#####MULTIPAROUS MODEL#####
-
-regcores()
-
-data_cortitre_multi$titre_ext <- foreach(r = 1:nrow(data_cortitre_multi), .combine = "c") %dopar% {
-  nrow(data_cortitre_multi[data_cortitre_multi$titre_corrected < 
-                             data_cortitre_multi$titre_corrected[r],]) /
-    nrow(data_cortitre_multi)
-} 
-
-stopCluster(cl)
-
-ggplot(data_cortitre_multi,
-       aes(x = titre_corrected,
-           y = titre_ext)) +
-  geom_point() +
-  labs(title = "Cumulative Distribution",
-       subtitle = "Multiparous Model",
-       x = "Corrected Titre",
-       y = "Percentile")
 
 
 ####PREDICT NEXT CORRECTED TITRE####
