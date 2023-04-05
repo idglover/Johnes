@@ -1863,11 +1863,11 @@ data_brms_multi <- data_brms[data_brms$parity != 1,]
 data_brms_primi$cellcount_log <- log(data_brms_primi$cellcount)
 data_brms_multi$cellcount_log <- log(data_brms_multi$cellcount)
 
-data_brms_primi$titre_pred <- predict(primi_mod5,
+data_brms_primi$titre_pred <- predict(primi_mod18m,
                                       newdata = data_brms_primi,
                                       re.form = ~ 0)
 
-data_brms_multi$titre_pred <- predict(primi_mod5,
+data_brms_multi$titre_pred <- predict(multi_mod8m,
                                       newdata = data_brms_multi,
                                       re.form = ~ 0)
 
@@ -1880,18 +1880,20 @@ primimedcow <- data.frame(age = median(data_brms_primi$age),
                  cellcount_log = median(data_brms_primi$cellcount_log),
                  dim = median(data_brms_primi$dim),
                  protein = median(data_brms_primi$protein),
-                 butterfat = median(data_brms_primi$butterfat))
+                 butterfat = median(data_brms_primi$butterfat),
+                 meantitrenegcows = median(data_brms_primi$meantitrenegcows))
 
-primimedcowtitre = predict(primi_mod5, newdata = primimedcow, re.form = ~0)
+primimedcowtitre = predict(primi_mod18m, newdata = primimedcow, re.form = ~0)
 
 multimedcow <- data.frame(age = median(data_brms_multi$age),
                           yield = median(data_brms_multi$yield),
                           cellcount_log = median(data_brms_multi$cellcount_log),
                           dim = median(data_brms_multi$dim),
                           protein = median(data_brms_multi$protein),
-                          butterfat = median(data_brms_multi$butterfat))
+                          butterfat = median(data_brms_multi$butterfat),
+                          meantitrenegcows = median(data_brms_multi$meantitrenegcows))
 
-multimedcowtitre = predict(multi_mod3, newdata = multimedcow, re.form = ~0)
+multimedcowtitre = predict(multi_mod8m, newdata = multimedcow, re.form = ~0)
 
 data_brms_primi$titre_cor <- data_brms_primi$unexp_titre + primimedcowtitre
 data_brms_multi$titre_cor <- data_brms_multi$unexp_titre + multimedcowtitre
